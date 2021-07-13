@@ -28,3 +28,4 @@ examples/test_enum
 /doc
 /print_ext
 /autom4te.cache
+!.circleci/config.yml
