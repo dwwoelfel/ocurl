@@ -460,6 +460,7 @@ type curlOption =
   | CURLOPT_SEEKFUNCTION of (int64 -> curlSeek -> curlSeekResult)
   | CURLOPT_AUTOREFERER of bool
   | CURLOPT_OPENSOCKETFUNCTION of (Unix.file_descr -> unit)
+  | CURLOPT_CREATESOCKETFUNCTION of (int -> int -> int -> Unix.file_descr)
   | CURLOPT_CLOSESOCKETFUNCTION of (Unix.file_descr -> unit)
   | CURLOPT_PROXYTYPE of curlProxyType
   | CURLOPT_PROTOCOLS of curlProto list
@@ -992,6 +993,9 @@ let set_autoreferer conn b =
 let set_opensocketfunction conn closure =
   setopt conn (CURLOPT_OPENSOCKETFUNCTION closure)
 
+let set_createsocketfunction conn closure =
+  setopt conn (CURLOPT_CREATESOCKETFUNCTION closure)
+
 let set_closesocketfunction conn closure =
   setopt conn (CURLOPT_CLOSESOCKETFUNCTION closure)
 
@@ -1391,6 +1395,7 @@ class handle =
     method set_dns_servers l = set_dns_servers conn l
     method set_autoreferer b = set_autoreferer conn b
     method set_opensocketfunction closure = set_opensocketfunction conn closure
+    method set_createsocketfunction closure = set_createsocketfunction conn closure
     method set_closesocketfunction closure = set_closesocketfunction conn closure
     method set_proxytype t = set_proxytype conn t
     method set_mimepost p = set_mimepost conn p

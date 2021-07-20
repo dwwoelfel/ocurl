@@ -104,6 +104,7 @@ typedef enum OcamlValues
     Ocaml_IOCTLFUNCTION,
     Ocaml_SEEKFUNCTION,
     Ocaml_OPENSOCKETFUNCTION,
+    Ocaml_CREATESOCKETFUNCTION,
     Ocaml_CLOSESOCKETFUNCTION,
     Ocaml_SSH_KEYFUNCTION,
 
@@ -1077,6 +1078,34 @@ static int cb_OPENSOCKETFUNCTION(void *data,
     return ((sock == -1) ? CURL_SOCKET_BAD : sock);
 }
 
+static int cb_CREATESOCKETFUNCTION(void *data,
+                        curlsocktype purpose,
+                        struct curl_sockaddr *addr)
+{
+    caml_leave_blocking_section();
+
+    CAMLparam0();
+    CAMLlocal1(result);
+    Connection *conn = (Connection *)data;
+    int sock = -1;
+    (void)purpose; /* not used */
+
+    // TODO: make an ocaml record that matches curl_sockaddr and variant that matches curlsocktype
+    result = caml_callback3_exn(Field(conn->ocamlValues, Ocaml_CREATESOCKETFUNCTION),
+                       Val_int(addr->family),
+                       Val_int(addr->socktype),
+                       Val_int(addr->protocol));
+
+    if (!Is_exception_result(result)) {
+      sock = Int_val(result);
+    }
+
+    CAMLdrop;
+
+    caml_enter_blocking_section();
+    return ((sock == -1) ? CURL_SOCKET_BAD : sock);
+}
+
 static int cb_CLOSESOCKETFUNCTION(void *data,
                          curl_socket_t socket)
 {
@@ -1464,6 +1493,18 @@ SETOPT_FUNCTION( IOCTL)
 
 SETOPT_FUNCTION( OPENSOCKET)
 SETOPT_FUNCTION( CLOSESOCKET)
+
+static void handle_CREATESOCKETFUNCTION(Connection *conn, value option)
+{
+    CAMLparam1(option);
+    CURLcode result = CURLE_OK;
+    Store_field(conn->ocamlValues, Ocaml_CREATESOCKETFUNCTION, option);
+    result = curl_easy_setopt(conn->handle, CURLOPT_OPENSOCKETFUNCTION, cb_CREATESOCKETFUNCTION);
+    if (result != CURLE_OK) raiseError(conn, result);
+    result = curl_easy_setopt(conn->handle, CURLOPT_OPENSOCKETDATA, conn);
+    if (result != CURLE_OK) raiseError(conn, result);
+    CAMLreturn0;
+}
 
 static void handle_slist(Connection *conn, struct curl_slist** slist, CURLoption curl_option, value option)
 {
@@ -3466,6 +3507,7 @@ CURLOptionMapping implementedOptionMap[] =
   HAVENOT(AUTOREFERER),
 #endif
   CURLOPT(OPENSOCKETFUNCTION),
+  CURLOPT(CREATESOCKETFUNCTION),
   CURLOPT(CLOSESOCKETFUNCTION),
 #if HAVE_DECL_CURLOPT_PROXYTYPE
   CURLOPT(PROXYTYPE),
