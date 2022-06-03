@@ -105,7 +105,7 @@ typedef enum OcamlValues
     Ocaml_IOCTLFUNCTION,
     Ocaml_SEEKFUNCTION,
     Ocaml_OPENSOCKETFUNCTION,
-    /* Ocaml_CLOSESOCKETFUNCTION, */
+    Ocaml_CLOSESOCKETFUNCTION,
     Ocaml_SSH_KEYFUNCTION,
 
     Ocaml_ERRORBUFFER,
@@ -1184,7 +1184,6 @@ static int cb_OPENSOCKETFUNCTION(void *data,
     return ((sock == -1) ? CURL_SOCKET_BAD : sock);
 }
 
-/*
 static int cb_CLOSESOCKETFUNCTION(void *data,
                          curl_socket_t socket)
 {
@@ -1205,7 +1204,6 @@ static int cb_CLOSESOCKETFUNCTION(void *data,
     caml_enter_blocking_section();
     return result;
 }
-*/
 
 static int cb_SSH_KEYFUNCTION(CURL *easy,
                               const struct curl_khkey *knownkey,
@@ -1581,7 +1579,7 @@ SETOPT_FUNCTION( IOCTL)
 #endif
 
 SETOPT_FUNCTION( OPENSOCKET)
-/* SETOPT_FUNCTION( CLOSESOCKET) */
+SETOPT_FUNCTION( CLOSESOCKET)
 
 static void handle_slist(Connection *conn, struct curl_slist** slist, CURLoption curl_option, value option)
 {
@@ -3620,7 +3618,7 @@ CURLOptionMapping implementedOptionMap[] =
   HAVENOT(AUTOREFERER),
 #endif
   HAVE(OPENSOCKETFUNCTION),
-  /*HAVE(CLOSESOCKETFUNCTION),*/
+  HAVE(CLOSESOCKETFUNCTION),
 #if HAVE_DECL_CURLOPT_PROXYTYPE
   HAVE(PROXYTYPE),
 #else
