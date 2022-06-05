@@ -1168,6 +1168,7 @@ static int cb_OPENSOCKETFUNCTION(void *data,
     (void)purpose; /* not used */
 
     sock = socket(addr->family, addr->socktype, addr->protocol);
+    printf("sock is %d\n", sock);
 
     if (-1 != sock)
     {
