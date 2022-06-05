@@ -999,6 +999,7 @@ static int cb_XFERINFOFUNCTION(void *data,
                               curl_off_t ulTotal,
                               curl_off_t ulNow)
 {
+    printf("XFERINFO\n");
     caml_leave_blocking_section();
 
     CAMLparam0();
