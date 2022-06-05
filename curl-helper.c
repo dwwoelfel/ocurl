@@ -1001,7 +1001,7 @@ static int cb_XFERINFOFUNCTION(void *data,
 {
     printf("XFERINFO\n");
     caml_leave_blocking_section();
-
+    printf("XFERINFO\n");
     CAMLparam0();
     CAMLlocal1(result);
     CAMLlocalN(callbackData, 4);
